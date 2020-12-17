@@ -5,7 +5,7 @@ from flask import jsonify
 import utils
 
 
-def organizations(request):
+def organizations():
     """
         To fetch and update the Organizations entity
     """
@@ -131,6 +131,7 @@ def organizations(request):
         "limit": 1000
     }
 
+    print("\nFetching the entities please wait. This will take sometime.")
     total_count, entities = utils.fetch_data(QUERY, END_POINT)
     if total_count is None:
         return "Error in parsing the API response. Please check the logs."
@@ -156,10 +157,10 @@ def organizations(request):
             else:
                 print("Entity is empty: ", e)
 
-        inserted = org_col.insert_many(entities)
+        org_col.insert_many(entities)
         fetch_records_count += len(entities)
-        print("inserted records: ")
-        pprint(inserted.inserted_ids)
+        # print("inserted records: ")
+        # pprint(inserted.inserted_ids)
         print("total_count: ", total_count,
               ", fetched records: ", fetch_records_count)
 
@@ -169,16 +170,16 @@ def organizations(request):
 
         after_id = entities[-1].get('uuid', None)
         if after_id:
-            print("Get next batch after id: ", after_id)
+            # print("Get next batch after id: ", after_id)
             # print("Entities len: ", )
             QUERY['after_id'] = after_id
         entities.clear()
 
     msg = {'entity': 'Organization', 'total_record_updated': fetch_records_count}
-    return jsonify(msg)
+    print("\nTask Done: ", msg)
 
 
-def people(request):
+def people():
     """
         To fetch and update the People entity.
     """
@@ -263,6 +264,7 @@ def people(request):
         "limit": 1000,
     }
 
+    print("\nFetching the entities please wait. This will take sometime.")
     total_count, entities = utils.fetch_data(QUERY, END_POINT)
     if total_count is None:
         return "Error in parsing the API response. Please check the logs."
@@ -289,10 +291,10 @@ def people(request):
             else:
                 print("Entity is empty: ", e)
 
-        inserted = col.insert_many(entities)
+        col.insert_many(entities)
         fetch_records_count += len(entities)
         print("inserted records: ")
-        pprint(inserted.inserted_ids)
+        # pprint(inserted.inserted_ids)
         print("total_count: ", total_count,
               ", fetched records: ", fetch_records_count)
 
@@ -302,17 +304,17 @@ def people(request):
 
         after_id = entities[-1].get('uuid', None)
         if after_id:
-            print("Get next batch after id: ", after_id)
+            # print("Get next batch after id: ", after_id)
             # print("Entities len: ", )
             QUERY['after_id'] = after_id
         entities.clear()
 
 
     msg = {'entity': 'Poeple', 'total_record_updated': fetch_records_count}
-    return jsonify(msg)
+    print("\nTask Done: ", msg)
 
 
-def funding_rounds(request):
+def funding_rounds():
     """
         To fetch and update the Funding Rounds entity.
     """
@@ -424,10 +426,10 @@ def funding_rounds(request):
 
     msg = {'entity': 'funding_rounds',
            'total_record_updated': fetch_records_count}
-    return jsonify(msg)
+    pprint(jsonify(msg))
 
 
-def acquisitions(request):
+def acquisitions():
     """
         To fetch and update the Acquisitions entity.
     """
@@ -535,10 +537,10 @@ def acquisitions(request):
 
     msg = {'entity': 'acquisitions',
            'total_record_updated': fetch_records_count}
-    return jsonify(msg)
+    pprint(jsonify(msg))
 
 
-def press_references(request):
+def press_references():
     """
         To fetch and update the Press References entity.
     """
@@ -627,4 +629,6 @@ def press_references(request):
 
     msg = {'entity': 'press_references',
            'total_record_updated': fetch_records_count}
-    return jsonify(msg)
+    pprint(jsonify(msg))
+
+people()

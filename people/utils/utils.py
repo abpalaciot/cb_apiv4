@@ -13,7 +13,7 @@ BASE_API_URL = 'https://api.crunchbase.com/api/v4/%s'
 MONGO_URL = os.environ.get('MONGO_URL', MONGO_URL)
 API_KEY = os.environ.get('CB_API_KEY', API_KEY)
 DATABASE_NAME = os.environ.get('MONGO_DB_NAME', DATABASE_NAME)
-# print("mongo: ", MONGO_URL, "API: ", API_KEY)
+#print("mongo: ", MONGO_URL, "API: ", API_KEY)
 
 def fetch_data(query, endpoint):
     """
