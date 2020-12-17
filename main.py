@@ -13,6 +13,9 @@ def organizations(request):
     END_POINT = 'searches/organizations'
 
     YESTURDAY_DATE = utils.get_yesterday_date()
+    TODAY_DATE = utils.get_today_date()
+    COLLECTION_NAME = 'organization_entities'
+
 
     QUERY = {
         "field_ids": [
@@ -135,49 +138,40 @@ def organizations(request):
     print("total count: ", total_count)
 
     # get the organization collection
-    org_col = utils.get_mongodb_collection('organizations')
+    org_col = utils.get_mongodb_collection(COLLECTION_NAME)
 
     fetch_records_count = 0
-    operations = []
 
     while fetch_records_count < total_count:
         if fetch_records_count != 0:
             _, entities = utils.fetch_data(QUERY, END_POINT)
 
+        if not entities:
+            print("no entities left i.e., entities = %s. moving on." % len(entities))
+            break
+
         for e in entities:
             if e:
-                operations.append(
-                    ReplaceOne({'uuid': e['uuid']}, e, upsert=True)
-                )
+                e['insert_date'] = TODAY_DATE
             else:
                 print("Entity is empty: ", e)
 
-        try:
-            if len(operations) > 0:
-                bulk_results = org_col.bulk_write(operations, ordered=False)
-                pprint(bulk_results.bulk_api_result)
-                fetch_records_count += len(entities)
-            else:
-                print("No operation left (len = %s). Moving on." %
-                      len(operations))
-                print("the entities list: ", entities)
-        except BulkWriteError as bwe:
-            pprint(bwe.details)
-
+        inserted = org_col.insert_many(entities)
+        fetch_records_count += len(entities)
+        print("inserted records: ")
+        pprint(inserted.inserted_ids)
         print("total_count: ", total_count,
               ", fetched records: ", fetch_records_count)
 
         # get the last record
-        if not entities:
-            break
+        
+        print("------------------------")
 
         after_id = entities[-1].get('uuid', None)
         if after_id:
-            print("print next batch after id: ", after_id)
+            print("Get next batch after id: ", after_id)
             # print("Entities len: ", )
             QUERY['after_id'] = after_id
-        print("------------------------")
-        operations.clear()
         entities.clear()
 
     msg = {'entity': 'Organization', 'total_record_updated': fetch_records_count}
@@ -189,10 +183,11 @@ def people(request):
         To fetch and update the People entity.
     """
     print("\n-------Getting people entities-------\n")
-    COLLECTION_NAME = 'people'
+    
     END_POINT = 'searches/people'
-
+    COLLECTION_NAME = 'people_entities'
     YESTURDAY_DATE = utils.get_yesterday_date()
+    TODAY_DATE = utils.get_today_date()
 
     QUERY = {
         "field_ids": [
@@ -278,51 +273,40 @@ def people(request):
     col = utils.get_mongodb_collection(COLLECTION_NAME)
 
     fetch_records_count = 0
-    operations = []
 
     # storing into the database and pagination
     while fetch_records_count < total_count:
         if fetch_records_count != 0:
             _, entities = utils.fetch_data(QUERY, END_POINT)
 
+        if not entities:
+            print("no entities left i.e., entities = %s. moving on." % len(entities))
+            break
+
         for e in entities:
-            # filter = {'uuid': e['uuid']}
             if e:
-                operations.append(
-                    ReplaceOne({'uuid': e['uuid']}, e, upsert=True)
-                )
+                e['insert_date'] = TODAY_DATE
             else:
                 print("Entity is empty: ", e)
-            # print("The filter is: ", filter)
-            # uuid_list.append(e['properties']['updated_at'])
 
-        try:
-            if len(operations) > 0:
-                bulk_results = col.bulk_write(operations, ordered=False)
-                pprint(bulk_results.bulk_api_result)
-                fetch_records_count += len(entities)
-            else:
-                print("No operation left (len = %s). Moving on." %
-                      len(operations))
-                print("the entities list: ", entities)
-        except BulkWriteError as bwe:
-            pprint(bwe.details)
-
+        inserted = col.insert_many(entities)
+        fetch_records_count += len(entities)
+        print("inserted records: ")
+        pprint(inserted.inserted_ids)
         print("total_count: ", total_count,
               ", fetched records: ", fetch_records_count)
 
-        # get the last record (for pagination)
-        if not entities:
-            break
+        # get the last record
+        
+        print("------------------------")
 
         after_id = entities[-1].get('uuid', None)
         if after_id:
-            print("print next batch after id: ", after_id)
+            print("Get next batch after id: ", after_id)
             # print("Entities len: ", )
             QUERY['after_id'] = after_id
-        print("------------------------")
-        operations.clear()
         entities.clear()
+
 
     msg = {'entity': 'Poeple', 'total_record_updated': fetch_records_count}
     return jsonify(msg)
@@ -334,9 +318,10 @@ def funding_rounds(request):
     """
 
     print("\n-------Getting Funding Rounds entities-------\n")
-    COLLECTION_NAME = 'funding_rounds'
+    
+    COLLECTION_NAME = 'funding_rounds_entities'
     END_POINT = 'searches/funding_rounds'
-
+    TODAY_DATE = utils.get_today_date()
     YESTURDAY_DATE = utils.get_yesterday_date()
 
     QUERY = {
@@ -403,51 +388,39 @@ def funding_rounds(request):
     col = utils.get_mongodb_collection(COLLECTION_NAME)
 
     fetch_records_count = 0
-    operations = []
-
+    
     # storing into the database and pagination
     while fetch_records_count < total_count:
         if fetch_records_count != 0:
             _, entities = utils.fetch_data(QUERY, END_POINT)
 
+        if not entities:
+            print("no entities left i.e., entities = %s. moving on." % len(entities))
+            break
+
         for e in entities:
-            # filter = {'uuid': e['uuid']}
             if e:
-                operations.append(
-                    ReplaceOne({'uuid': e['uuid']}, e, upsert=True)
-                )
+                e['insert_date'] = TODAY_DATE
             else:
                 print("Entity is empty: ", e)
-            # print("The filter is: ", filter)
-            # uuid_list.append(e['properties']['updated_at'])
 
-        try:
-            if len(operations) > 0:
-                bulk_results = col.bulk_write(operations, ordered=False)
-                pprint(bulk_results.bulk_api_result)
-                fetch_records_count += len(entities)
-            else:
-                print("No operation left (len = %s). Moving on." %
-                      len(operations))
-                print("the entities list: ", entities)
-        except BulkWriteError as bwe:
-            pprint(bwe.details)
-
+        inserted = col.insert_many(entities)
+        fetch_records_count += len(entities)
+        print("inserted records: ")
+        pprint(inserted.inserted_ids)
         print("total_count: ", total_count,
               ", fetched records: ", fetch_records_count)
 
-        # get the last record (for pagination)
-        if not entities:
-            break
+        print("------------------------")
 
+        # get the last record
         after_id = entities[-1].get('uuid', None)
         if after_id:
-            print("print next batch after id: ", after_id)
+            print("Get next batch after id: ", after_id)
             # print("Entities len: ", )
             QUERY['after_id'] = after_id
-        print("------------------------")
-        operations.clear()
         entities.clear()
+
 
     msg = {'entity': 'funding_rounds',
            'total_record_updated': fetch_records_count}
@@ -460,9 +433,9 @@ def acquisitions(request):
     """
 
     print("\n-------Getting Acquisitions entities-------\n")
-    COLLECTION_NAME = 'acquisitions'
+    COLLECTION_NAME = 'acquisitions_entities'
     END_POINT = 'searches/acquisitions'
-
+    TODAY_DATE = utils.get_today_date()
     YESTURDAY_DATE = utils.get_yesterday_date()
 
     QUERY = {
@@ -527,50 +500,37 @@ def acquisitions(request):
     col = utils.get_mongodb_collection(COLLECTION_NAME)
 
     fetch_records_count = 0
-    operations = []
-
+    
     # storing into the database and pagination
     while fetch_records_count < total_count:
         if fetch_records_count != 0:
             _, entities = utils.fetch_data(QUERY, END_POINT)
 
+        if not entities:
+            print("no entities left i.e., entities = %s. moving on." % len(entities))
+            break
+
         for e in entities:
-            # filter = {'uuid': e['uuid']}
             if e:
-                operations.append(
-                    ReplaceOne({'uuid': e['uuid']}, e, upsert=True)
-                )
+                e['insert_date'] = TODAY_DATE
             else:
                 print("Entity is empty: ", e)
-            # print("The filter is: ", filter)
-            # uuid_list.append(e['properties']['updated_at'])
 
-        try:
-            if len(operations) > 0:
-                bulk_results = col.bulk_write(operations, ordered=False)
-                pprint(bulk_results.bulk_api_result)
-                fetch_records_count += len(entities)
-            else:
-                print("No operation left (len = %s). Moving on." %
-                      len(operations))
-                print("the entities list: ", entities)
-        except BulkWriteError as bwe:
-            pprint(bwe.details)
-
+        inserted = col.insert_many(entities)
+        fetch_records_count += len(entities)
+        print("inserted records: ")
+        pprint(inserted.inserted_ids)
         print("total_count: ", total_count,
               ", fetched records: ", fetch_records_count)
 
-        # get the last record (for pagination)
-        if not entities:
-            break
+        print("------------------------")
 
+        # get the last record
         after_id = entities[-1].get('uuid', None)
         if after_id:
-            print("print next batch after id: ", after_id)
+            print("Get next batch after id: ", after_id)
             # print("Entities len: ", )
             QUERY['after_id'] = after_id
-        print("------------------------")
-        operations.clear()
         entities.clear()
 
     msg = {'entity': 'acquisitions',
@@ -584,9 +544,9 @@ def press_references(request):
     """
 
     print("\n-------Getting Press References entities-------\n")
-    COLLECTION_NAME = 'press_references'
+    COLLECTION_NAME = 'press_reference_entities'
     END_POINT = 'searches/press_references'
-
+    TODAY_DATE = utils.get_today_date()
     YESTURDAY_DATE = utils.get_yesterday_date()
 
     QUERY = {
@@ -632,50 +592,37 @@ def press_references(request):
     col = utils.get_mongodb_collection(COLLECTION_NAME)
 
     fetch_records_count = 0
-    operations = []
-
+    
     # storing into the database and pagination
     while fetch_records_count < total_count:
         if fetch_records_count != 0:
             _, entities = utils.fetch_data(QUERY, END_POINT)
 
+        if not entities:
+            print("no entities left i.e., entities = %s. moving on." % len(entities))
+            break
+
         for e in entities:
-            # filter = {'uuid': e['uuid']}
             if e:
-                operations.append(
-                    ReplaceOne({'uuid': e['uuid']}, e, upsert=True)
-                )
+                e['insert_date'] = TODAY_DATE
             else:
                 print("Entity is empty: ", e)
-            # print("The filter is: ", filter)
-            # uuid_list.append(e['properties']['updated_at'])
 
-        try:
-            if len(operations) > 0:
-                bulk_results = col.bulk_write(operations, ordered=False)
-                pprint(bulk_results.bulk_api_result)
-                fetch_records_count += len(entities)
-            else:
-                print("No operation left (len = %s). Moving on." %
-                      len(operations))
-                print("the entities list: ", entities)
-        except BulkWriteError as bwe:
-            pprint(bwe.details)
-
+        inserted = col.insert_many(entities)
+        fetch_records_count += len(entities)
+        print("inserted records: ")
+        pprint(inserted.inserted_ids)
         print("total_count: ", total_count,
               ", fetched records: ", fetch_records_count)
 
-        # get the last record (for pagination)
-        if not entities:
-            break
+        print("------------------------")
 
+        # get the last record
         after_id = entities[-1].get('uuid', None)
         if after_id:
-            print("print next batch after id: ", after_id)
+            print("Get next batch after id: ", after_id)
             # print("Entities len: ", )
             QUERY['after_id'] = after_id
-        print("------------------------")
-        operations.clear()
         entities.clear()
 
     msg = {'entity': 'press_references',

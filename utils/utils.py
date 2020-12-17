@@ -41,14 +41,25 @@ def fetch_data(query, endpoint):
     return total_count, entities
 
 
+def get_today_date():
+    """
+        Gets the today's UTC date.
+    """
+    
+    today = datetime.utcnow()
+    print("Today's date: %s " % today)
+    return  today
+
+
+
 def get_yesterday_date():
     """
-        Gets the yesturday's date.
+        Gets the yesturday's UTC date.
     """
     
     today = datetime.today().astimezone().astimezone(timezone.utc)
-    yest = today - timedelta(days=1, minutes=60)
-    print("Today's date: %s and yestruday's date: %s" % (today, yest))
+    yest = today - timedelta(days=1)
+    print("Yestruday's date: %s" % yest)
 
     return  yest
 
