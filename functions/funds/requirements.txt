@@ -1,0 +1,6 @@
+# Function dependencies, for example:
+# package>=version
+pymongo[srv]
+fake-headers==1.0.2
+requests
+
